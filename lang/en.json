@@ -12,23 +12,28 @@
       "RightLeg": "Right Leg"
     },
     "Dialog": {
-  "Title": "Zone Actions",
-  "Content": "What do you want to do?",
-  "Add": "Add Wound",
-  "View": "View Zone",
-  "Cancel": "Cancel"
-},
-"AddWoundTitle": "Add Wound",
-"SelectSeverity": "Select severity",
-"Confirm": "Confirm",
-"Cancel": "Cancel",
-"Severity": {
-  "superficial": "Superficial",
-  "light": "Light",
-  "moderate": "Moderate",
-  "severe": "Severe",
-  "critical": "Critical",
-  "mortal": "Mortal"
-}
+      "Title": "Zone Actions",
+      "Content": "What do you want to do?",
+      "Add": "Add Wound",
+      "View": "View Zone",
+      "Cancel": "Cancel"
+    },
+    "AddWoundTitle": "Add Wound",
+    "SelectSeverity": "Select severity",
+    "Confirm": "Confirm",
+    "Cancel": "Cancel",
+    "Severity": {
+      "superficial": "Superficial",
+      "light": "Light",
+      "moderate": "Moderate",
+      "severe": "Severe",
+      "critical": "Critical",
+      "mortal": "Mortal"
+    },
+    "ViewZoneTitle": "Zone wounds",
+    "NoWounds": "No wounds on this zone.",
+    "Remove": "Remove",
+    "Close": "Close",
+    "WoundRemoved": "Wound removed."
   }
 }

@@ -117,7 +117,7 @@ class WoundsApp extends Application {
           view: {
             label: game.i18n.localize("PF2EAW.Dialog.View"),
             callback: () => {
-              ui.notifications.info(`View zone: ${zoneId}`);
+              this._openViewZoneDialog(zoneId);
             }
           },
           cancel: {
@@ -178,4 +178,55 @@ class WoundsApp extends Application {
 
     ui.notifications.info(`Wound added: ${zoneId} (${severity})`);
   }
+  _openViewZoneDialog(zoneId) {
+  const wounds = foundry.utils.getProperty(this.actor, "flags.pf2e-advanced-wounds.wounds") ?? [];
+  const zoneWounds = wounds.filter((wound) => wound.zone === zoneId);
+
+  const zoneLabel = game.i18n.localize(
+    BODY_SCHEMAS.simple.find((zone) => zone.id === zoneId)?.label ?? zoneId
+  );
+
+  const content = zoneWounds.length
+    ? `
+      <div class="pf2eaw-zone-wounds">
+        ${zoneWounds.map((wound) => `
+          <div class="pf2eaw-wound-row">
+            <strong>${game.i18n.localize(`PF2EAW.Severity.${wound.severity}`)}</strong>
+            <button type="button" class="pf2eaw-remove-wound" data-wound-id="${wound.id}">
+              ${game.i18n.localize("PF2EAW.Remove")}
+            </button>
+          </div>
+        `).join("")}
+      </div>
+    `
+    : `<p>${game.i18n.localize("PF2EAW.NoWounds")}</p>`;
+
+  new Dialog({
+    title: `${game.i18n.localize("PF2EAW.ViewZoneTitle")} — ${zoneLabel}`,
+    content,
+    buttons: {
+      close: {
+        label: game.i18n.localize("PF2EAW.Close")
+      }
+    },
+    render: (html) => {
+      html.find(".pf2eaw-remove-wound").on("click", async (event) => {
+        const woundId = event.currentTarget.dataset.woundId;
+        await this._removeWound(woundId);
+        html.closest(".dialog").find(".close").click();
+        this._openViewZoneDialog(zoneId);
+      });
+    }
+  }).render(true);
+}
+
+async _removeWound(woundId) {
+  const wounds = foundry.utils.getProperty(this.actor, "flags.pf2e-advanced-wounds.wounds") ?? [];
+  const updatedWounds = wounds.filter((wound) => wound.id !== woundId);
+
+  await this.actor.setFlag("pf2e-advanced-wounds", "wounds", updatedWounds);
+  this.render(false);
+
+  ui.notifications.info(game.i18n.localize("PF2EAW.WoundRemoved"));
+}
 }

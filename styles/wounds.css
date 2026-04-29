@@ -43,8 +43,8 @@
 }
 
 .pf2eaw-status-superficial {
-  background: #e8f5e9;
-  color: #111111;
+  background: #b9f6ca;
+  border-color: #2e7d32;
 }
 
 .pf2eaw-status-light {
@@ -70,4 +70,24 @@
 .pf2eaw-status-mortal {
   background: #000000;
   color: #ffffff;
+}
+
+.pf2eaw-zone-wounds {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pf2eaw-wound-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem;
+  border: 1px solid #777;
+  border-radius: 6px;
+}
+
+.pf2eaw-remove-wound {
+  cursor: pointer;
 }
