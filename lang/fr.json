@@ -17,6 +17,18 @@
   "Add": "Ajouter une blessure",
   "View": "Voir la zone",
   "Cancel": "Annuler"
+},
+"AddWoundTitle": "Ajouter une blessure",
+"SelectSeverity": "Choisir la gravité",
+"Confirm": "Valider",
+"Cancel": "Annuler",
+"Severity": {
+  "superficial": "Superficielle",
+  "light": "Légère",
+  "moderate": "Modérée",
+  "severe": "Grave",
+  "critical": "Très grave",
+  "mortal": "Mortelle"
 }
   }
 }

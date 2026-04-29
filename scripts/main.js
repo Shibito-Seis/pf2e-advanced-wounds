@@ -13,7 +13,14 @@ const BODY_SCHEMAS = {
   ],
   advanced: []
 };
-
+const WOUND_SEVERITIES = [
+  "superficial",
+  "light",
+  "moderate",
+  "severe",
+  "critical",
+  "mortal"
+];
 Hooks.on("renderActorSheet", (app, html, data) => {
   if (!(app.actor?.type === "character" || app.actor?.type === "npc")) return;
   if (html.find(".pf2eaw-button").length > 0) return;
@@ -77,7 +84,7 @@ activateListeners(html) {
         add: {
           label: game.i18n.localize("PF2EAW.Dialog.Add"),
           callback: () => {
-            ui.notifications.info(`Add wound to: ${zoneId}`);
+            this._openAddWoundDialog(zoneId);
           }
         },
         view: {

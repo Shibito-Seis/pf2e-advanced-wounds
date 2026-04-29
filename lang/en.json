@@ -17,6 +17,18 @@
   "Add": "Add Wound",
   "View": "View Zone",
   "Cancel": "Cancel"
+},
+"AddWoundTitle": "Add Wound",
+"SelectSeverity": "Select severity",
+"Confirm": "Confirm",
+"Cancel": "Cancel",
+"Severity": {
+  "superficial": "Superficial",
+  "light": "Light",
+  "moderate": "Moderate",
+  "severe": "Severe",
+  "critical": "Critical",
+  "mortal": "Mortal"
 }
   }
 }
