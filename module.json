@@ -34,6 +34,6 @@
       }
     ]
   },
-  "manifest": "https://raw.githubusercontent.com/Shibito-Seis/pf2e-advanced-wounds/main/module.json",
+  "manifest": "https://raw.githubusercontent.com/Shibito-Seis/pf2e-advanced-wounds/refs/heads/main/module.json",
   "download": "https://github.com/Shibito-Seis/pf2e-advanced-wounds/archive/refs/heads/main.zip"
 }
