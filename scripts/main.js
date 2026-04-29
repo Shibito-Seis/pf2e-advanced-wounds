@@ -13,6 +13,7 @@ const BODY_SCHEMAS = {
   ],
   advanced: []
 };
+
 const WOUND_SEVERITIES = [
   "superficial",
   "light",
@@ -21,6 +22,7 @@ const WOUND_SEVERITIES = [
   "critical",
   "mortal"
 ];
+
 Hooks.on("renderActorSheet", (app, html, data) => {
   if (!(app.actor?.type === "character" || app.actor?.type === "npc")) return;
   if (html.find(".pf2eaw-button").length > 0) return;
@@ -57,48 +59,95 @@ class WoundsApp extends Application {
   }
 
   getData() {
-  return {
-    actor: this.actor,
-    zones: BODY_SCHEMAS.simple,
-    canEdit: game.user.isGM
-  };
-}
+    return {
+      actor: this.actor,
+      zones: BODY_SCHEMAS.simple,
+      canEdit: game.user.isGM
+    };
+  }
 
-activateListeners(html) {
-  super.activateListeners(html);
+  activateListeners(html) {
+    super.activateListeners(html);
 
-  html.find(".pf2eaw-zone").on("click", (event) => {
-    const zoneId = event.currentTarget.dataset.zoneId;
+    html.find(".pf2eaw-zone").on("click", (event) => {
+      const zoneId = event.currentTarget.dataset.zoneId;
 
-    // Si pas MJ → message
-    if (!game.user.isGM) {
-      ui.notifications.warn(game.i18n.localize("PF2EAW.ReadOnly"));
-      return;
-    }
+      if (!game.user.isGM) {
+        ui.notifications.warn(game.i18n.localize("PF2EAW.ReadOnly"));
+        return;
+      }
 
-    // Si MJ → ouvrir dialogue
-    new Dialog({
-      title: game.i18n.localize("PF2EAW.Dialog.Title"),
-      content: `<p>${game.i18n.localize("PF2EAW.Dialog.Content")}</p>`,
-      buttons: {
-        add: {
-          label: game.i18n.localize("PF2EAW.Dialog.Add"),
-          callback: () => {
-            this._openAddWoundDialog(zoneId);
+      new Dialog({
+        title: game.i18n.localize("PF2EAW.Dialog.Title"),
+        content: `<p>${game.i18n.localize("PF2EAW.Dialog.Content")}</p>`,
+        buttons: {
+          add: {
+            label: game.i18n.localize("PF2EAW.Dialog.Add"),
+            callback: () => {
+              this._openAddWoundDialog(zoneId);
+            }
+          },
+          view: {
+            label: game.i18n.localize("PF2EAW.Dialog.View"),
+            callback: () => {
+              ui.notifications.info(`View zone: ${zoneId}`);
+            }
+          },
+          cancel: {
+            label: game.i18n.localize("PF2EAW.Dialog.Cancel")
           }
         },
-        view: {
-          label: game.i18n.localize("PF2EAW.Dialog.View"),
-          callback: () => {
-            ui.notifications.info(`View zone: ${zoneId}`);
+        default: "add"
+      }).render(true);
+    });
+  }
+
+  _openAddWoundDialog(zoneId) {
+    const options = WOUND_SEVERITIES.map((severity) => {
+      const label = game.i18n.localize(`PF2EAW.Severity.${severity}`);
+      return `<option value="${severity}">${label}</option>`;
+    }).join("");
+
+    new Dialog({
+      title: game.i18n.localize("PF2EAW.AddWoundTitle"),
+      content: `
+        <form>
+          <div class="form-group">
+            <label>${game.i18n.localize("PF2EAW.SelectSeverity")}</label>
+            <select id="pf2eaw-severity">
+              ${options}
+            </select>
+          </div>
+        </form>
+      `,
+      buttons: {
+        confirm: {
+          label: game.i18n.localize("PF2EAW.Confirm"),
+          callback: async (html) => {
+            const severity = html.find("#pf2eaw-severity").val();
+            await this._addWound(zoneId, severity);
           }
         },
         cancel: {
-          label: game.i18n.localize("PF2EAW.Dialog.Cancel")
+          label: game.i18n.localize("PF2EAW.Cancel")
         }
       },
-      default: "add"
+      default: "confirm"
     }).render(true);
-  });
-}
+  }
+
+  async _addWound(zoneId, severity) {
+    const wounds = foundry.utils.getProperty(this.actor, "flags.pf2eaw.wounds") ?? [];
+
+    wounds.push({
+      id: foundry.utils.randomID(),
+      zone: zoneId,
+      severity,
+      createdAt: Date.now()
+    });
+
+    await this.actor.setFlag("pf2eaw", "wounds", wounds);
+
+    ui.notifications.info(`Wound added: ${zoneId} (${severity})`);
+  }
 }
