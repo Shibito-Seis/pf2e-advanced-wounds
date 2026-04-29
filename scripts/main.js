@@ -23,6 +23,30 @@ const WOUND_SEVERITIES = [
   "mortal"
 ];
 
+const WOUND_SEVERITY_RANK = {
+  healthy: 0,
+  superficial: 1,
+  light: 2,
+  moderate: 3,
+  severe: 4,
+  critical: 5,
+  mortal: 6
+};
+
+function getZoneStatus(actor, zoneId) {
+  const wounds = foundry.utils.getProperty(actor, "flags.pf2eaw.wounds") ?? [];
+  const zoneWounds = wounds.filter((wound) => wound.zone === zoneId);
+
+  if (zoneWounds.length === 0) return "healthy";
+
+  return zoneWounds.reduce((highest, wound) => {
+    const currentRank = WOUND_SEVERITY_RANK[wound.severity] ?? 0;
+    const highestRank = WOUND_SEVERITY_RANK[highest] ?? 0;
+
+    return currentRank > highestRank ? wound.severity : highest;
+  }, "healthy");
+}
+
 Hooks.on("renderActorSheet", (app, html, data) => {
   if (!(app.actor?.type === "character" || app.actor?.type === "npc")) return;
   if (html.find(".pf2eaw-button").length > 0) return;
@@ -61,7 +85,10 @@ class WoundsApp extends Application {
   getData() {
     return {
       actor: this.actor,
-      zones: BODY_SCHEMAS.simple,
+      zones: BODY_SCHEMAS.simple.map((zone) => ({
+  ...zone,
+  status: getZoneStatus(this.actor, zone.id)
+})),
       canEdit: game.user.isGM
     };
   }
@@ -147,6 +174,7 @@ class WoundsApp extends Application {
     });
 
     await this.actor.setFlag("pf2eaw", "wounds", wounds);
+    this.render(false);
 
     ui.notifications.info(`Wound added: ${zoneId} (${severity})`);
   }

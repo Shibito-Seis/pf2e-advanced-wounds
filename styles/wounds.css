@@ -31,13 +31,43 @@
   filter: brightness(0.95);
 }
 
+.pf2eaw-note {
+  margin-top: 0.75rem;
+  font-style: italic;
+  opacity: 0.75;
+}
+
 .pf2eaw-status-healthy {
   background: #ffffff;
   color: #111111;
 }
 
-.pf2eaw-note {
-  margin-top: 0.75rem;
-  font-style: italic;
-  opacity: 0.75;
+.pf2eaw-status-superficial {
+  background: #e8f5e9;
+  color: #111111;
+}
+
+.pf2eaw-status-light {
+  background: #fff176;
+  color: #111111;
+}
+
+.pf2eaw-status-moderate {
+  background: #ffb74d;
+  color: #111111;
+}
+
+.pf2eaw-status-severe {
+  background: #ef5350;
+  color: #111111;
+}
+
+.pf2eaw-status-critical {
+  background: #8b1e1e;
+  color: #ffffff;
+}
+
+.pf2eaw-status-mortal {
+  background: #000000;
+  color: #ffffff;
 }
