@@ -34,7 +34,7 @@ const WOUND_SEVERITY_RANK = {
 };
 
 function getZoneStatus(actor, zoneId) {
-  const wounds = foundry.utils.getProperty(actor, "flags.pf2eaw.wounds") ?? [];
+  const wounds = foundry.utils.getProperty(actor, "flags.pf2e-advanced-wounds.wounds") ?? [];
   const zoneWounds = wounds.filter((wound) => wound.zone === zoneId);
 
   if (zoneWounds.length === 0) return "healthy";
@@ -164,7 +164,7 @@ class WoundsApp extends Application {
   }
 
   async _addWound(zoneId, severity) {
-    const wounds = foundry.utils.getProperty(this.actor, "flags.pf2eaw.wounds") ?? [];
+    const wounds = foundry.utils.getProperty(this.actor, "flags.pf2e-advanced-wounds.wounds") ?? [];
 
     wounds.push({
       id: foundry.utils.randomID(),
@@ -173,7 +173,7 @@ class WoundsApp extends Application {
       createdAt: Date.now()
     });
 
-    await this.actor.setFlag("pf2eaw", "wounds", wounds);
+    await this.actor.setFlag("pf2e-advanced-wounds", "wounds", wounds);
     this.render(false);
 
     ui.notifications.info(`Wound added: ${zoneId} (${severity})`);
