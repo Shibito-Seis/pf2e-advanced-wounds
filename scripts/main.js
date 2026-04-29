@@ -50,10 +50,19 @@ class WoundsApp extends Application {
   }
 
   getData() {
-    return {
-      actor: this.actor,
-      zones: BODY_SCHEMAS.simple,
-      canEdit: game.user.isGM
-    };
-  }
+  return {
+    actor: this.actor,
+    zones: BODY_SCHEMAS.simple,
+    canEdit: game.user.isGM
+  };
+}
+
+activateListeners(html) {
+  super.activateListeners(html);
+
+  html.find(".pf2eaw-zone").on("click", (event) => {
+    const zoneId = event.currentTarget.dataset.zoneId;
+    ui.notifications.info(`Selected zone: ${zoneId}`);
+  });
+}
 }
