@@ -62,7 +62,36 @@ activateListeners(html) {
 
   html.find(".pf2eaw-zone").on("click", (event) => {
     const zoneId = event.currentTarget.dataset.zoneId;
-    ui.notifications.info(`Selected zone: ${zoneId}`);
+
+    // Si pas MJ → message
+    if (!game.user.isGM) {
+      ui.notifications.warn(game.i18n.localize("PF2EAW.ReadOnly"));
+      return;
+    }
+
+    // Si MJ → ouvrir dialogue
+    new Dialog({
+      title: game.i18n.localize("PF2EAW.Dialog.Title"),
+      content: `<p>${game.i18n.localize("PF2EAW.Dialog.Content")}</p>`,
+      buttons: {
+        add: {
+          label: game.i18n.localize("PF2EAW.Dialog.Add"),
+          callback: () => {
+            ui.notifications.info(`Add wound to: ${zoneId}`);
+          }
+        },
+        view: {
+          label: game.i18n.localize("PF2EAW.Dialog.View"),
+          callback: () => {
+            ui.notifications.info(`View zone: ${zoneId}`);
+          }
+        },
+        cancel: {
+          label: game.i18n.localize("PF2EAW.Dialog.Cancel")
+        }
+      },
+      default: "add"
+    }).render(true);
   });
 }
 }

@@ -10,6 +10,13 @@
       "RightArm": "Bras droit",
       "LeftLeg": "Jambe gauche",
       "RightLeg": "Jambe droite"
-    }
+    },
+    "Dialog": {
+  "Title": "Actions de la zone",
+  "Content": "Que souhaitez-vous faire ?",
+  "Add": "Ajouter une blessure",
+  "View": "Voir la zone",
+  "Cancel": "Annuler"
+}
   }
 }

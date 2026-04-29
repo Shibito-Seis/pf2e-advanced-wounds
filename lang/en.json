@@ -10,6 +10,13 @@
       "RightArm": "Right Arm",
       "LeftLeg": "Left Leg",
       "RightLeg": "Right Leg"
-    }
+    },
+    "Dialog": {
+  "Title": "Zone Actions",
+  "Content": "What do you want to do?",
+  "Add": "Add Wound",
+  "View": "View Zone",
+  "Cancel": "Cancel"
+}
   }
 }
