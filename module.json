@@ -1,0 +1,32 @@
+{
+  "id": "pf2e-advanced-wounds",
+  "title": "PF2e Advanced Wounds",
+  "description": "Advanced localized wound and affliction system for Pathfinder 2e.",
+  "version": "0.1.0",
+  "authors": [
+    {
+      "name": "Shibito-Seis"
+    }
+  ],
+  "esmodules": ["scripts/main.js"],
+  "styles": ["styles/wounds.css"],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ],
+  "compatibility": {
+    "minimum": "13",
+    "verified": "13.351"
+  },
+  "relationships": {
+    "systems": [
+      {
+        "id": "pf2e",
+        "type": "system"
+      }
+    ]
+  }
+}
