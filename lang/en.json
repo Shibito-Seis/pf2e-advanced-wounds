@@ -1,5 +1,6 @@
 {
   "PF2EAW": {
-    "Wounds": "Wounds"
+    "Wounds": "Wounds",
+    "Initialized": "Wounds system initialized."
   }
 }
