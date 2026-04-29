@@ -1,1 +1,43 @@
-/* Styles will go here */
+.pf2eaw {
+  padding: 0.75rem;
+}
+
+.pf2eaw-header h2 {
+  margin: 0 0 0.25rem 0;
+}
+
+.pf2eaw-header p {
+  margin: 0 0 0.75rem 0;
+  opacity: 0.8;
+}
+
+.pf2eaw-body-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+.pf2eaw-zone {
+  min-height: 4rem;
+  border: 2px solid #555;
+  border-radius: 8px;
+  padding: 0.5rem;
+  cursor: pointer;
+  font-weight: bold;
+  text-align: center;
+}
+
+.pf2eaw-zone:hover {
+  filter: brightness(0.95);
+}
+
+.pf2eaw-status-healthy {
+  background: #ffffff;
+  color: #111111;
+}
+
+.pf2eaw-note {
+  margin-top: 0.75rem;
+  font-style: italic;
+  opacity: 0.75;
+}

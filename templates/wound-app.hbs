@@ -1,4 +1,18 @@
 <div class="pf2eaw">
-  <h2>{{actor.name}}</h2>
-  <p>{{localize "PF2EAW.Initialized"}}</p>
+  <header class="pf2eaw-header">
+    <h2>{{actor.name}}</h2>
+    <p>{{localize "PF2EAW.Initialized"}}</p>
+  </header>
+
+  <section class="pf2eaw-body-grid">
+    {{#each zones}}
+      <button class="pf2eaw-zone pf2eaw-status-{{status}}" data-zone-id="{{id}}">
+        <span class="pf2eaw-zone-label">{{localize label}}</span>
+      </button>
+    {{/each}}
+  </section>
+
+  {{#unless canEdit}}
+    <p class="pf2eaw-note">{{localize "PF2EAW.ReadOnly"}}</p>
+  {{/unless}}
 </div>

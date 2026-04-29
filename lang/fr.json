@@ -1,6 +1,15 @@
 {
   "PF2EAW": {
     "Wounds": "Blessures",
-    "Initialized": "Système de blessures initialisé."
+    "Initialized": "Système de blessures initialisé.",
+    "ReadOnly": "Seul le MJ peut modifier les blessures.",
+    "Body": {
+      "Head": "Tête",
+      "Torso": "Torse",
+      "LeftArm": "Bras gauche",
+      "RightArm": "Bras droit",
+      "LeftLeg": "Jambe gauche",
+      "RightLeg": "Jambe droite"
+    }
   }
 }

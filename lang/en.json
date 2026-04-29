@@ -1,6 +1,15 @@
 {
   "PF2EAW": {
     "Wounds": "Wounds",
-    "Initialized": "Wounds system initialized."
+    "Initialized": "Wounds system initialized.",
+    "ReadOnly": "Only the GM can edit wounds.",
+    "Body": {
+      "Head": "Head",
+      "Torso": "Torso",
+      "LeftArm": "Left Arm",
+      "RightArm": "Right Arm",
+      "LeftLeg": "Left Leg",
+      "RightLeg": "Right Leg"
+    }
   }
 }

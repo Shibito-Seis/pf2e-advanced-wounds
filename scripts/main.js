@@ -2,35 +2,36 @@ Hooks.on("init", () => {
   console.log("PF2e Advanced Wounds | Initialized");
 });
 
-/**
- * Add button to PF2e actor sheet
- */
+const BODY_SCHEMAS = {
+  simple: [
+    { id: "head", label: "PF2EAW.Body.Head", status: "healthy" },
+    { id: "torso", label: "PF2EAW.Body.Torso", status: "healthy" },
+    { id: "leftArm", label: "PF2EAW.Body.LeftArm", status: "healthy" },
+    { id: "rightArm", label: "PF2EAW.Body.RightArm", status: "healthy" },
+    { id: "leftLeg", label: "PF2EAW.Body.LeftLeg", status: "healthy" },
+    { id: "rightLeg", label: "PF2EAW.Body.RightLeg", status: "healthy" }
+  ],
+  advanced: []
+};
+
 Hooks.on("renderActorSheet", (app, html, data) => {
-  // Vérifie que c'est une fiche PF2e
-  if (app.actor?.type === "character" || app.actor?.type === "npc") {
-    
-    // Évite d'ajouter plusieurs fois le bouton
-    if (html.find(".pf2eaw-button").length > 0) return;
+  if (!(app.actor?.type === "character" || app.actor?.type === "npc")) return;
+  if (html.find(".pf2eaw-button").length > 0) return;
 
-    const button = $(`
-      <a class="pf2eaw-button">
-        <i class="fas fa-heart-broken"></i> ${game.i18n.localize("PF2EAW.Wounds")}
-      </a>
-    `);
+  const button = $(`
+    <a class="pf2eaw-button">
+      <i class="fas fa-heart-broken"></i> ${game.i18n.localize("PF2EAW.Wounds")}
+    </a>
+  `);
 
-    button.on("click", () => {
-      new WoundsApp(app.actor).render(true);
-    });
+  button.on("click", () => {
+    new WoundsApp(app.actor).render(true);
+  });
 
-    // On ajoute le bouton en haut de la fiche
-    const header = html.find(".window-title");
-    header.after(button);
-  }
+  const header = html.find(".window-title");
+  header.after(button);
 });
 
-/**
- * Basic Wounds App
- */
 class WoundsApp extends Application {
   constructor(actor) {
     super();
@@ -40,17 +41,19 @@ class WoundsApp extends Application {
   static get defaultOptions() {
     return mergeObject(super.defaultOptions, {
       id: "pf2eaw",
-      title: "Wounds",
+      title: game.i18n.localize("PF2EAW.Wounds"),
       template: "modules/pf2e-advanced-wounds/templates/wound-app.hbs",
-      width: 400,
-      height: 300,
+      width: 520,
+      height: 420,
       resizable: true
     });
   }
 
   getData() {
     return {
-      actor: this.actor
+      actor: this.actor,
+      zones: BODY_SCHEMAS.simple,
+      canEdit: game.user.isGM
     };
   }
 }
