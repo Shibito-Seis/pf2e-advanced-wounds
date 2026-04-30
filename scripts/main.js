@@ -47,6 +47,28 @@ function getZoneStatus(actor, zoneId) {
   }, "healthy");
 }
 
+function getZoneWounds(actor, zoneId) {
+  const wounds = foundry.utils.getProperty(actor, "flags.pf2e-advanced-wounds.wounds") ?? [];
+  return wounds.filter((wound) => wound.zone === zoneId);
+}
+
+function buildZoneTooltip(actor, zone) {
+  const wounds = getZoneWounds(actor, zone.id);
+  const status = getZoneStatus(actor, zone.id);
+  const zoneLabel = game.i18n.localize(zone.label);
+
+  if (wounds.length === 0) {
+    return `${zoneLabel}\n${game.i18n.localize("PF2EAW.NoWounds")}`;
+  }
+
+  const statusLabel = game.i18n.localize(`PF2EAW.Severity.${status}`);
+  const woundLines = wounds.map((wound) => {
+    return `- ${game.i18n.localize(`PF2EAW.Severity.${wound.severity}`)}`;
+  }).join("\n");
+
+  return `${zoneLabel}\n${game.i18n.localize("PF2EAW.WoundCount")}: ${wounds.length}\n${game.i18n.localize("PF2EAW.MainStatus")}: ${statusLabel}\n${woundLines}`;
+}
+
 Hooks.on("renderActorSheet", (app, html, data) => {
   if (!(app.actor?.type === "character" || app.actor?.type === "npc")) return;
   if (html.find(".pf2eaw-button").length > 0) return;
@@ -85,10 +107,16 @@ class WoundsApp extends Application {
   getData() {
     return {
       actor: this.actor,
-      zones: BODY_SCHEMAS.simple.map((zone) => ({
-  ...zone,
-  status: getZoneStatus(this.actor, zone.id)
-})),
+    zones: BODY_SCHEMAS.simple.map((zone) => {
+  const wounds = getZoneWounds(this.actor, zone.id);
+
+  return {
+    ...zone,
+    status: getZoneStatus(this.actor, zone.id),
+    woundCount: wounds.length,
+    tooltip: buildZoneTooltip(this.actor, zone)
+  };
+}),
       canEdit: game.user.isGM
     };
   }

@@ -34,6 +34,8 @@
     "NoWounds": "No wounds on this zone.",
     "Remove": "Remove",
     "Close": "Close",
-    "WoundRemoved": "Wound removed."
+    "WoundRemoved": "Wound removed.",
+    "WoundCount": "Wounds",
+    "MainStatus": "Main status"
   }
 }

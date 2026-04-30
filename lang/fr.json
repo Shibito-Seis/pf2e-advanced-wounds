@@ -34,6 +34,8 @@
     "NoWounds": "Aucune blessure sur cette zone.",
     "Remove": "Retirer",
     "Close": "Fermer",
-    "WoundRemoved": "Blessure retirée."
+    "WoundRemoved": "Blessure retirée.",
+    "WoundCount": "Blessures",
+    "MainStatus": "État principal"
   }
 }

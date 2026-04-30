@@ -6,9 +6,13 @@
 
   <section class="pf2eaw-body-grid">
     {{#each zones}}
-      <button class="pf2eaw-zone pf2eaw-status-{{status}}" data-zone-id="{{id}}">
-        <span class="pf2eaw-zone-label">{{localize label}}</span>
-      </button>
+      <button class="pf2eaw-zone pf2eaw-status-{{status}}" data-zone-id="{{id}}" title="{{tooltip}}">
+  <span class="pf2eaw-zone-label">{{localize label}}</span>
+
+  {{#if woundCount}}
+    <span class="pf2eaw-wound-count">{{woundCount}}</span>
+  {{/if}}
+</button>
     {{/each}}
   </section>
 

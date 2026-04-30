@@ -91,3 +91,22 @@
 .pf2eaw-remove-wound {
   cursor: pointer;
 }
+
+.pf2eaw-zone {
+  position: relative;
+}
+
+.pf2eaw-wound-count {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.35rem;
+  min-width: 1.35rem;
+  height: 1.35rem;
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  background: #222222;
+  color: #ffffff;
+  font-size: 0.8rem;
+  line-height: 1.35rem;
+  text-align: center;
+}
