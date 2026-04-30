@@ -48,6 +48,15 @@
       "magic": "Magic"
     },
     "NoAfflictions": "No afflictions on this zone.",
-    "AfflictionRemoved": "Affliction removed."
+    "AfflictionRemoved": "Affliction removed.",
+    "AfflictionApplied": "{type} applied to {zone}.",
+    "Duration": "Duration",
+    "Interval": "Interval",
+    "Days": "days",
+    "AfflictionState": {
+      "active": "Active",
+      "stabilized": "Stabilized",
+      "cured": "Cured"
+    }
   }
 }

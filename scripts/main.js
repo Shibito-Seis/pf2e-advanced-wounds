@@ -32,6 +32,21 @@ const AFFLICTION_TYPES = [
   "magic"
 ];
 
+const SECONDS_PER_DAY = 86400;
+
+const AFFLICTION_DEFAULTS = {
+  poison: { durationDays: 1, intervalDays: 1 },
+  disease: { durationDays: 7, intervalDays: 1 },
+  infection: { durationDays: 7, intervalDays: 1 },
+  magic: { durationDays: 3, intervalDays: 1 }
+};
+
+const AFFLICTION_STATES = [
+  "active",
+  "stabilized",
+  "cured"
+];
+
 const WOUND_SEVERITY_RANK = {
   healthy: 0,
   superficial: 1,
@@ -96,7 +111,12 @@ function buildZoneTooltip(actor, zone) {
     lines.push(`${game.i18n.localize("PF2EAW.Afflictions")}: ${afflictions.length}`);
 
     for (const affliction of afflictions) {
-      lines.push(`* ${game.i18n.localize(`PF2EAW.Affliction.${affliction.type}`)}`);
+  const typeLabel = game.i18n.localize(`PF2EAW.Affliction.${affliction.type}`);
+  const stateLabel = game.i18n.localize(`PF2EAW.AfflictionState.${affliction.state ?? "active"}`);
+
+  lines.push(`* ${typeLabel} (${stateLabel})`);
+  lines.push(`  ${game.i18n.localize("PF2EAW.Duration")}: ${affliction.durationDays ?? "?"} ${game.i18n.localize("PF2EAW.Days")}`);
+  lines.push(`  ${game.i18n.localize("PF2EAW.Interval")}: ${affliction.intervalDays ?? "?"} ${game.i18n.localize("PF2EAW.Days")}`);
     }
   }
 
@@ -283,21 +303,32 @@ class WoundsApp extends Application {
     ui.notifications.info(`Wound added: ${zoneId} (${severity})`);
   }
 
-  async _addAffliction(zoneId, type) {
-    const afflictions = getActorAfflictions(this.actor);
+async _addAffliction(zoneId, type) {
+  const afflictions = getActorAfflictions(this.actor);
+  const defaults = AFFLICTION_DEFAULTS[type] ?? { durationDays: 1, intervalDays: 1 };
+  const createdAtWorldTime = game.time.worldTime ?? 0;
 
-    afflictions.push({
-      id: foundry.utils.randomID(),
-      zone: zoneId,
-      type,
-      createdAt: Date.now()
-    });
+  afflictions.push({
+    id: foundry.utils.randomID(),
+    zone: zoneId,
+    type,
+    state: "active",
+    createdAt: Date.now(),
+    createdAtWorldTime,
+    durationDays: defaults.durationDays,
+    intervalDays: defaults.intervalDays,
+    nextCheckAtWorldTime: createdAtWorldTime + defaults.intervalDays * SECONDS_PER_DAY,
+    endsAtWorldTime: createdAtWorldTime + defaults.durationDays * SECONDS_PER_DAY
+  });
 
-    await this.actor.setFlag(MODULE_ID, "afflictions", afflictions);
-    this.render(false);
+  await this.actor.setFlag(MODULE_ID, "afflictions", afflictions);
+  this.render(false);
 
-    ui.notifications.info(`${type} applied to ${zoneId}`);
-  }
+  ui.notifications.info(game.i18n.format("PF2EAW.AfflictionApplied", {
+    type: game.i18n.localize(`PF2EAW.Affliction.${type}`),
+    zone: zoneId
+  }));
+}
 
 _openViewZoneDialog(zoneId) {
   const wounds = getZoneWounds(this.actor, zoneId);
@@ -319,15 +350,25 @@ _openViewZoneDialog(zoneId) {
     : `<p>${game.i18n.localize("PF2EAW.NoWounds")}</p>`;
 
   const afflictionsContent = afflictions.length
-    ? afflictions.map((affliction) => `
+  ? afflictions.map((affliction) => {
+    const typeLabel = game.i18n.localize(`PF2EAW.Affliction.${affliction.type}`);
+    const stateLabel = game.i18n.localize(`PF2EAW.AfflictionState.${affliction.state ?? "active"}`);
+
+    return `
       <div class="pf2eaw-wound-row">
-        <strong>${game.i18n.localize(`PF2EAW.Affliction.${affliction.type}`)}</strong>
+        <div>
+          <strong>${typeLabel}</strong>
+          <div class="pf2eaw-small">
+            ${stateLabel} — ${game.i18n.localize("PF2EAW.Duration")}: ${affliction.durationDays ?? "?"} ${game.i18n.localize("PF2EAW.Days")}
+          </div>
+        </div>
         <button type="button" class="pf2eaw-remove-affliction" data-affliction-id="${affliction.id}">
           ${game.i18n.localize("PF2EAW.Remove")}
         </button>
       </div>
-    `).join("")
-    : `<p>${game.i18n.localize("PF2EAW.NoAfflictions")}</p>`;
+    `;
+  }).join("")
+  : `<p>${game.i18n.localize("PF2EAW.NoAfflictions")}</p>`;
 
   const content = `
     <div class="pf2eaw-zone-wounds">
