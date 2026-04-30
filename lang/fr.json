@@ -36,6 +36,15 @@
     "Close": "Fermer",
     "WoundRemoved": "Blessure retirée.",
     "WoundCount": "Blessures",
-    "MainStatus": "État principal"
+    "MainStatus": "État principal",
+    "Afflictions": "Afflictions",
+    "AddAfflictionTitle": "Ajouter une affliction",
+    "SelectAffliction": "Choisir l'affliction",
+    "Affliction": {
+      "poison": "Poison",
+      "disease": "Maladie",
+      "infection": "Infection",
+      "magic": "Magie"
+    }
   }
 }

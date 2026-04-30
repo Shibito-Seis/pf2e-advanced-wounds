@@ -36,6 +36,15 @@
     "Close": "Close",
     "WoundRemoved": "Wound removed.",
     "WoundCount": "Wounds",
-    "MainStatus": "Main status"
+    "MainStatus": "Main status",
+    "Afflictions": "Afflictions",
+    "AddAfflictionTitle": "Add Affliction",
+    "SelectAffliction": "Select affliction",
+    "Affliction": {
+      "poison": "Poison",
+      "disease": "Disease",
+      "infection": "Infection",
+      "magic": "Magic"
+    }
   }
 }

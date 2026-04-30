@@ -2,6 +2,8 @@ Hooks.on("init", () => {
   console.log("PF2e Advanced Wounds | Initialized");
 });
 
+const MODULE_ID = "pf2e-advanced-wounds";
+
 const BODY_SCHEMAS = {
   simple: [
     { id: "head", label: "PF2EAW.Body.Head", status: "healthy" },
@@ -23,6 +25,13 @@ const WOUND_SEVERITIES = [
   "mortal"
 ];
 
+const AFFLICTION_TYPES = [
+  "poison",
+  "disease",
+  "infection",
+  "magic"
+];
+
 const WOUND_SEVERITY_RANK = {
   healthy: 0,
   superficial: 1,
@@ -33,9 +42,24 @@ const WOUND_SEVERITY_RANK = {
   mortal: 6
 };
 
+function getActorWounds(actor) {
+  return foundry.utils.getProperty(actor, `flags.${MODULE_ID}.wounds`) ?? [];
+}
+
+function getActorAfflictions(actor) {
+  return foundry.utils.getProperty(actor, `flags.${MODULE_ID}.afflictions`) ?? [];
+}
+
+function getZoneWounds(actor, zoneId) {
+  return getActorWounds(actor).filter((wound) => wound.zone === zoneId);
+}
+
+function getZoneAfflictions(actor, zoneId) {
+  return getActorAfflictions(actor).filter((affliction) => affliction.zone === zoneId);
+}
+
 function getZoneStatus(actor, zoneId) {
-  const wounds = foundry.utils.getProperty(actor, "flags.pf2e-advanced-wounds.wounds") ?? [];
-  const zoneWounds = wounds.filter((wound) => wound.zone === zoneId);
+  const zoneWounds = getZoneWounds(actor, zoneId);
 
   if (zoneWounds.length === 0) return "healthy";
 
@@ -47,26 +71,36 @@ function getZoneStatus(actor, zoneId) {
   }, "healthy");
 }
 
-function getZoneWounds(actor, zoneId) {
-  const wounds = foundry.utils.getProperty(actor, "flags.pf2e-advanced-wounds.wounds") ?? [];
-  return wounds.filter((wound) => wound.zone === zoneId);
-}
-
 function buildZoneTooltip(actor, zone) {
   const wounds = getZoneWounds(actor, zone.id);
+  const afflictions = getZoneAfflictions(actor, zone.id);
   const status = getZoneStatus(actor, zone.id);
   const zoneLabel = game.i18n.localize(zone.label);
 
+  const lines = [zoneLabel];
+
   if (wounds.length === 0) {
-    return `${zoneLabel}\n${game.i18n.localize("PF2EAW.NoWounds")}`;
+    lines.push(game.i18n.localize("PF2EAW.NoWounds"));
+  } else {
+    const statusLabel = game.i18n.localize(`PF2EAW.Severity.${status}`);
+    lines.push(`${game.i18n.localize("PF2EAW.WoundCount")}: ${wounds.length}`);
+    lines.push(`${game.i18n.localize("PF2EAW.MainStatus")}: ${statusLabel}`);
+
+    for (const wound of wounds) {
+      lines.push(`- ${game.i18n.localize(`PF2EAW.Severity.${wound.severity}`)}`);
+    }
   }
 
-  const statusLabel = game.i18n.localize(`PF2EAW.Severity.${status}`);
-  const woundLines = wounds.map((wound) => {
-    return `- ${game.i18n.localize(`PF2EAW.Severity.${wound.severity}`)}`;
-  }).join("\n");
+  if (afflictions.length > 0) {
+    lines.push("");
+    lines.push(`${game.i18n.localize("PF2EAW.Afflictions")}: ${afflictions.length}`);
 
-  return `${zoneLabel}\n${game.i18n.localize("PF2EAW.WoundCount")}: ${wounds.length}\n${game.i18n.localize("PF2EAW.MainStatus")}: ${statusLabel}\n${woundLines}`;
+    for (const affliction of afflictions) {
+      lines.push(`* ${game.i18n.localize(`PF2EAW.Affliction.${affliction.type}`)}`);
+    }
+  }
+
+  return lines.join("\n");
 }
 
 Hooks.on("renderActorSheet", (app, html, data) => {
@@ -107,16 +141,18 @@ class WoundsApp extends Application {
   getData() {
     return {
       actor: this.actor,
-    zones: BODY_SCHEMAS.simple.map((zone) => {
-  const wounds = getZoneWounds(this.actor, zone.id);
+      zones: BODY_SCHEMAS.simple.map((zone) => {
+        const wounds = getZoneWounds(this.actor, zone.id);
+        const afflictions = getZoneAfflictions(this.actor, zone.id);
 
-  return {
-    ...zone,
-    status: getZoneStatus(this.actor, zone.id),
-    woundCount: wounds.length,
-    tooltip: buildZoneTooltip(this.actor, zone)
-  };
-}),
+        return {
+          ...zone,
+          status: getZoneStatus(this.actor, zone.id),
+          woundCount: wounds.length,
+          afflictionCount: afflictions.length,
+          tooltip: buildZoneTooltip(this.actor, zone)
+        };
+      }),
       canEdit: game.user.isGM
     };
   }
@@ -140,6 +176,12 @@ class WoundsApp extends Application {
             label: game.i18n.localize("PF2EAW.Dialog.Add"),
             callback: () => {
               this._openAddWoundDialog(zoneId);
+            }
+          },
+          affliction: {
+            label: game.i18n.localize("PF2EAW.Dialog.AddAffliction"),
+            callback: () => {
+              this._openAddAfflictionDialog(zoneId);
             }
           },
           view: {
@@ -191,8 +233,42 @@ class WoundsApp extends Application {
     }).render(true);
   }
 
+  _openAddAfflictionDialog(zoneId) {
+    const options = AFFLICTION_TYPES.map((type) => {
+      const label = game.i18n.localize(`PF2EAW.Affliction.${type}`);
+      return `<option value="${type}">${label}</option>`;
+    }).join("");
+
+    new Dialog({
+      title: game.i18n.localize("PF2EAW.AddAfflictionTitle"),
+      content: `
+        <form>
+          <div class="form-group">
+            <label>${game.i18n.localize("PF2EAW.SelectAffliction")}</label>
+            <select id="pf2eaw-affliction">
+              ${options}
+            </select>
+          </div>
+        </form>
+      `,
+      buttons: {
+        confirm: {
+          label: game.i18n.localize("PF2EAW.Confirm"),
+          callback: async (html) => {
+            const type = html.find("#pf2eaw-affliction").val();
+            await this._addAffliction(zoneId, type);
+          }
+        },
+        cancel: {
+          label: game.i18n.localize("PF2EAW.Cancel")
+        }
+      },
+      default: "confirm"
+    }).render(true);
+  }
+
   async _addWound(zoneId, severity) {
-    const wounds = foundry.utils.getProperty(this.actor, "flags.pf2e-advanced-wounds.wounds") ?? [];
+    const wounds = getActorWounds(this.actor);
 
     wounds.push({
       id: foundry.utils.randomID(),
@@ -201,60 +277,76 @@ class WoundsApp extends Application {
       createdAt: Date.now()
     });
 
-    await this.actor.setFlag("pf2e-advanced-wounds", "wounds", wounds);
+    await this.actor.setFlag(MODULE_ID, "wounds", wounds);
     this.render(false);
 
     ui.notifications.info(`Wound added: ${zoneId} (${severity})`);
   }
+
+  async _addAffliction(zoneId, type) {
+    const afflictions = getActorAfflictions(this.actor);
+
+    afflictions.push({
+      id: foundry.utils.randomID(),
+      zone: zoneId,
+      type,
+      createdAt: Date.now()
+    });
+
+    await this.actor.setFlag(MODULE_ID, "afflictions", afflictions);
+    this.render(false);
+
+    ui.notifications.info(`${type} applied to ${zoneId}`);
+  }
+
   _openViewZoneDialog(zoneId) {
-  const wounds = foundry.utils.getProperty(this.actor, "flags.pf2e-advanced-wounds.wounds") ?? [];
-  const zoneWounds = wounds.filter((wound) => wound.zone === zoneId);
+    const wounds = getZoneWounds(this.actor, zoneId);
 
-  const zoneLabel = game.i18n.localize(
-    BODY_SCHEMAS.simple.find((zone) => zone.id === zoneId)?.label ?? zoneId
-  );
+    const zoneLabel = game.i18n.localize(
+      BODY_SCHEMAS.simple.find((zone) => zone.id === zoneId)?.label ?? zoneId
+    );
 
-  const content = zoneWounds.length
-    ? `
-      <div class="pf2eaw-zone-wounds">
-        ${zoneWounds.map((wound) => `
-          <div class="pf2eaw-wound-row">
-            <strong>${game.i18n.localize(`PF2EAW.Severity.${wound.severity}`)}</strong>
-            <button type="button" class="pf2eaw-remove-wound" data-wound-id="${wound.id}">
-              ${game.i18n.localize("PF2EAW.Remove")}
-            </button>
-          </div>
-        `).join("")}
-      </div>
-    `
-    : `<p>${game.i18n.localize("PF2EAW.NoWounds")}</p>`;
+    const content = wounds.length
+      ? `
+        <div class="pf2eaw-zone-wounds">
+          ${wounds.map((wound) => `
+            <div class="pf2eaw-wound-row">
+              <strong>${game.i18n.localize(`PF2EAW.Severity.${wound.severity}`)}</strong>
+              <button type="button" class="pf2eaw-remove-wound" data-wound-id="${wound.id}">
+                ${game.i18n.localize("PF2EAW.Remove")}
+              </button>
+            </div>
+          `).join("")}
+        </div>
+      `
+      : `<p>${game.i18n.localize("PF2EAW.NoWounds")}</p>`;
 
-  new Dialog({
-    title: `${game.i18n.localize("PF2EAW.ViewZoneTitle")} — ${zoneLabel}`,
-    content,
-    buttons: {
-      close: {
-        label: game.i18n.localize("PF2EAW.Close")
+    new Dialog({
+      title: `${game.i18n.localize("PF2EAW.ViewZoneTitle")} — ${zoneLabel}`,
+      content,
+      buttons: {
+        close: {
+          label: game.i18n.localize("PF2EAW.Close")
+        }
+      },
+      render: (html) => {
+        html.find(".pf2eaw-remove-wound").on("click", async (event) => {
+          const woundId = event.currentTarget.dataset.woundId;
+          await this._removeWound(woundId);
+          html.closest(".dialog").find(".close").click();
+          this._openViewZoneDialog(zoneId);
+        });
       }
-    },
-    render: (html) => {
-      html.find(".pf2eaw-remove-wound").on("click", async (event) => {
-        const woundId = event.currentTarget.dataset.woundId;
-        await this._removeWound(woundId);
-        html.closest(".dialog").find(".close").click();
-        this._openViewZoneDialog(zoneId);
-      });
-    }
-  }).render(true);
-}
+    }).render(true);
+  }
 
-async _removeWound(woundId) {
-  const wounds = foundry.utils.getProperty(this.actor, "flags.pf2e-advanced-wounds.wounds") ?? [];
-  const updatedWounds = wounds.filter((wound) => wound.id !== woundId);
+  async _removeWound(woundId) {
+    const wounds = getActorWounds(this.actor);
+    const updatedWounds = wounds.filter((wound) => wound.id !== woundId);
 
-  await this.actor.setFlag("pf2e-advanced-wounds", "wounds", updatedWounds);
-  this.render(false);
+    await this.actor.setFlag(MODULE_ID, "wounds", updatedWounds);
+    this.render(false);
 
-  ui.notifications.info(game.i18n.localize("PF2EAW.WoundRemoved"));
-}
+    ui.notifications.info(game.i18n.localize("PF2EAW.WoundRemoved"));
+  }
 }
