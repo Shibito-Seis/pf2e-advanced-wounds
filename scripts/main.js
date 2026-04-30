@@ -299,46 +299,71 @@ class WoundsApp extends Application {
     ui.notifications.info(`${type} applied to ${zoneId}`);
   }
 
-  _openViewZoneDialog(zoneId) {
-    const wounds = getZoneWounds(this.actor, zoneId);
+_openViewZoneDialog(zoneId) {
+  const wounds = getZoneWounds(this.actor, zoneId);
+  const afflictions = getZoneAfflictions(this.actor, zoneId);
 
-    const zoneLabel = game.i18n.localize(
-      BODY_SCHEMAS.simple.find((zone) => zone.id === zoneId)?.label ?? zoneId
-    );
+  const zoneLabel = game.i18n.localize(
+    BODY_SCHEMAS.simple.find((zone) => zone.id === zoneId)?.label ?? zoneId
+  );
 
-    const content = wounds.length
-      ? `
-        <div class="pf2eaw-zone-wounds">
-          ${wounds.map((wound) => `
-            <div class="pf2eaw-wound-row">
-              <strong>${game.i18n.localize(`PF2EAW.Severity.${wound.severity}`)}</strong>
-              <button type="button" class="pf2eaw-remove-wound" data-wound-id="${wound.id}">
-                ${game.i18n.localize("PF2EAW.Remove")}
-              </button>
-            </div>
-          `).join("")}
-        </div>
-      `
-      : `<p>${game.i18n.localize("PF2EAW.NoWounds")}</p>`;
+  const woundsContent = wounds.length
+    ? wounds.map((wound) => `
+      <div class="pf2eaw-wound-row">
+        <strong>${game.i18n.localize(`PF2EAW.Severity.${wound.severity}`)}</strong>
+        <button type="button" class="pf2eaw-remove-wound" data-wound-id="${wound.id}">
+          ${game.i18n.localize("PF2EAW.Remove")}
+        </button>
+      </div>
+    `).join("")
+    : `<p>${game.i18n.localize("PF2EAW.NoWounds")}</p>`;
 
-    new Dialog({
-      title: `${game.i18n.localize("PF2EAW.ViewZoneTitle")} — ${zoneLabel}`,
-      content,
-      buttons: {
-        close: {
-          label: game.i18n.localize("PF2EAW.Close")
-        }
-      },
-      render: (html) => {
-        html.find(".pf2eaw-remove-wound").on("click", async (event) => {
-          const woundId = event.currentTarget.dataset.woundId;
-          await this._removeWound(woundId);
-          html.closest(".dialog").find(".close").click();
-          this._openViewZoneDialog(zoneId);
-        });
+  const afflictionsContent = afflictions.length
+    ? afflictions.map((affliction) => `
+      <div class="pf2eaw-wound-row">
+        <strong>${game.i18n.localize(`PF2EAW.Affliction.${affliction.type}`)}</strong>
+        <button type="button" class="pf2eaw-remove-affliction" data-affliction-id="${affliction.id}">
+          ${game.i18n.localize("PF2EAW.Remove")}
+        </button>
+      </div>
+    `).join("")
+    : `<p>${game.i18n.localize("PF2EAW.NoAfflictions")}</p>`;
+
+  const content = `
+    <div class="pf2eaw-zone-wounds">
+      <h3>${game.i18n.localize("PF2EAW.Wounds")}</h3>
+      ${woundsContent}
+
+      <h3>${game.i18n.localize("PF2EAW.Afflictions")}</h3>
+      ${afflictionsContent}
+    </div>
+  `;
+
+  new Dialog({
+    title: `${game.i18n.localize("PF2EAW.ViewZoneTitle")} — ${zoneLabel}`,
+    content,
+    buttons: {
+      close: {
+        label: game.i18n.localize("PF2EAW.Close")
       }
-    }).render(true);
-  }
+    },
+    render: (html) => {
+      html.find(".pf2eaw-remove-wound").on("click", async (event) => {
+        const woundId = event.currentTarget.dataset.woundId;
+        await this._removeWound(woundId);
+        html.closest(".dialog").find(".close").click();
+        this._openViewZoneDialog(zoneId);
+      });
+
+      html.find(".pf2eaw-remove-affliction").on("click", async (event) => {
+        const afflictionId = event.currentTarget.dataset.afflictionId;
+        await this._removeAffliction(afflictionId);
+        html.closest(".dialog").find(".close").click();
+        this._openViewZoneDialog(zoneId);
+      });
+    }
+  }).render(true);
+}
 
   async _removeWound(woundId) {
     const wounds = getActorWounds(this.actor);
@@ -348,5 +373,14 @@ class WoundsApp extends Application {
     this.render(false);
 
     ui.notifications.info(game.i18n.localize("PF2EAW.WoundRemoved"));
+  }
+  async _removeAffliction(afflictionId) {
+  const afflictions = getActorAfflictions(this.actor);
+  const updatedAfflictions = afflictions.filter((affliction) => affliction.id !== afflictionId);
+
+  await this.actor.setFlag(MODULE_ID, "afflictions", updatedAfflictions);
+  this.render(false);
+
+  ui.notifications.info(game.i18n.localize("PF2EAW.AfflictionRemoved"));
   }
 }

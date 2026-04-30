@@ -46,6 +46,8 @@
       "disease": "Disease",
       "infection": "Infection",
       "magic": "Magic"
-    }
+    },
+    "NoAfflictions": "No afflictions on this zone.",
+    "AfflictionRemoved": "Affliction removed."
   }
 }

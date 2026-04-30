@@ -46,6 +46,8 @@
       "disease": "Maladie",
       "infection": "Infection",
       "magic": "Magie"
-    }
+    },
+    "NoAfflictions": "Aucune affliction sur cette zone.",
+    "AfflictionRemoved": "Affliction retirée."
   }
 }
