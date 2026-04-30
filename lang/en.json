@@ -15,6 +15,7 @@
       "Title": "Zone Actions",
       "Content": "What do you want to do?",
       "Add": "Add Wound",
+      "AddAffliction": "Add Affliction",
       "View": "View Zone",
       "Cancel": "Cancel"
     },
